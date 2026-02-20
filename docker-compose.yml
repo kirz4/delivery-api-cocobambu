@@ -1,0 +1,17 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: delivery-backend
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: delivery_api.settings
+      DEBUG: "1"
+      SECRET_KEY: "dev-secret"
+      ORDERS_JSON_PATH: /app/data/pedidos.json
+      ALLOWED_HOSTS: "localhost,127.0.0.1"
+    volumes:
+      - ./backend:/app
+      - ./backend/data:/app/data
+    command: python manage.py runserver 0.0.0.0:8000
