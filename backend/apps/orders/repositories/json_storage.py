@@ -7,11 +7,14 @@ class JsonStorage:
     def __init__(self):
         self.path = Path(settings.ORDERS_JSON_PATH)
 
-    def read(self) -> dict:
+    def read(self):
         if not self.path.exists() or self.path.stat().st_size == 0:
-            return {"orders": []}
-        with self.path.open("r", encoding="utf-8") as f:
-            return json.load(f)
+            return []
+        try:
+            with self.path.open("r", encoding="utf-8") as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            return []
 
     def write_atomic(self, data: dict) -> None:
         tmp = self.path.with_suffix(self.path.suffix + ".tmp")
