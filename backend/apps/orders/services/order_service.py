@@ -1,19 +1,31 @@
 import time
-from ..repositories.order_repository import OrderRepository
+from ..repositories.json_storage import JsonStorage
 from ..domain.status_machine import assert_transition
+
 
 class OrderService:
     def __init__(self):
-        self.repo = OrderRepository()
+        self.storage = JsonStorage()
 
     def change_status(self, order_id: str, new_status: str, origin: str = "SYSTEM"):
-        orders = self.repo.list()
-        idx = next((i for i, o in enumerate(orders) if o.get("order_id") == order_id), None)
-        if idx is None:
+        data = self.storage.read()
+
+        # data deve ser LISTA (seu caso)
+        if not isinstance(data, list):
+            return None, "invalid_storage"
+
+        index = None
+        for i, row in enumerate(data):
+            if row.get("order_id") == order_id:
+                index = i
+                break
+
+        if index is None:
             return None, "not_found"
 
-        row = orders[idx]
-        current = row["order"].get("last_status_name")
+        row = data[index]
+        order = row.get("order", {})
+        current = order.get("last_status_name")
 
         assert_transition(current, new_status)
 
@@ -24,10 +36,13 @@ class OrderService:
             "origin": origin,
         }
 
-        row["order"]["statuses"].append(event)
-        row["order"]["last_status_name"] = new_status.upper()
+        statuses = order.get("statuses", [])
+        statuses.append(event)
 
-        orders[idx] = row
-        self.repo.save_all(orders)
+        order["statuses"] = statuses
+        order["last_status_name"] = new_status.upper()
+        row["order"] = order
+        data[index] = row
 
+        self.storage.write_atomic(data)
         return row, None
