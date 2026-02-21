@@ -1,25 +1,61 @@
 import json
 from django.http import JsonResponse
-from django.views.decorators.http import require_GET, require_http_methods
+from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+
 from .repositories.order_repository import OrderRepository
 from .domain.status_machine import InvalidTransitionError
 from .services.order_service import OrderService
 
 
-@require_GET
-def list_orders(request):
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def orders_collection(request):
     repo = OrderRepository()
-    return JsonResponse(repo.list(), safe=False)
+
+    if request.method == "GET":
+        return JsonResponse(repo.list(), safe=False)
+
+    # POST
+    try:
+        payload = json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    order_id = payload.get("order_id")
+    store_id = payload.get("store_id")
+    order = payload.get("order")
+
+    if not order_id or not store_id or not isinstance(order, dict):
+        return JsonResponse(
+            {"error": "Fields 'order_id', 'store_id', and 'order' are required"},
+            status=400,
+        )
+
+    if repo.get_by_id(order_id):
+        return JsonResponse({"error": "Order already exists"}, status=409)
+
+    created = repo.create(payload)
+    return JsonResponse(created, status=201)
 
 
-@require_GET
-def get_order(request, order_id: str):
+@csrf_exempt
+@require_http_methods(["GET", "DELETE"])
+def order_resource(request, order_id: str):
     repo = OrderRepository()
-    order = repo.get_by_id(order_id)
-    if not order:
+
+    if request.method == "GET":
+        order = repo.get_by_id(order_id)
+        if not order:
+            return JsonResponse({"error": "Order not found"}, status=404)
+        return JsonResponse(order, safe=False)
+
+    # DELETE
+    ok = repo.delete(order_id)
+    if not ok:
         return JsonResponse({"error": "Order not found"}, status=404)
-    return JsonResponse(order, safe=False)
+    return JsonResponse({"deleted": True}, status=200)
+
 
 @csrf_exempt
 @require_http_methods(["PATCH"])
