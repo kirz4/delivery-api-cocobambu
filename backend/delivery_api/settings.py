@@ -1,5 +1,11 @@
 import os
 from pathlib import Path
+print(">>> SETTINGS LOADED: delivery_api.settings")
+print(">>> DEBUG =", os.getenv("DEBUG"))
+print(">>> ALLOWED_HOSTS(raw) =", os.getenv("ALLOWED_HOSTS"))
+print(">>> CORS_ALLOWED_ORIGINS =", [
+    "https://delivery-api-cocobambu.vercel.app",
+])
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
