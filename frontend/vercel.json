@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://delivery-api-cocobambu.onrender.com/api/:path*"
+    }
+  ]
+}
