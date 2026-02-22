@@ -41,3 +41,11 @@ logs/
 .idea/
 *.swp
 *.swo
+
+# Coverage (local)
+backend/coverage.xml
+backend/.coverage
+backend/htmlcov/
+.coverage
+coverage.xml
+htmlcov/
