@@ -7,15 +7,23 @@ import {
   Stack,
   TextField,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { DataGrid } from "@mui/x-data-grid";
+
 const formatBRL = (value) =>
   new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
   }).format(Number(value ?? 0));
+
 export default function OrdersDashboard() {
   const navigate = useNavigate();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const [rows, setRows] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [search, setSearch] = React.useState("");
@@ -45,39 +53,58 @@ export default function OrdersDashboard() {
     fetchOrders();
   }, []);
 
-  const filteredRows = rows.filter((row) =>
-    row.order_id.toLowerCase().includes(search.toLowerCase()) ||
-    row.store.toLowerCase().includes(search.toLowerCase()) ||
-    row.status.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredRows = rows.filter((row) => {
+    const q = search.toLowerCase();
+    return (
+      row.order_id.toLowerCase().includes(q) ||
+      row.store.toLowerCase().includes(q) ||
+      row.status.toLowerCase().includes(q)
+    );
+  });
 
   const columns = [
-    { field: "order_id", headerName: "Order ID", flex: 1, minWidth: 260 },
-    { field: "store", headerName: "Loja", flex: 1 },
+    {
+      field: "order_id",
+      headerName: "Order ID",
+      flex: 1,
+      minWidth: isMobile ? 220 : 260,
+    },
+    {
+      field: "store",
+      headerName: "Loja",
+      flex: 1,
+      minWidth: 180,
+      hide: isMobile, // no celular, esconde pra caber melhor
+    },
     {
       field: "status",
       headerName: "Status",
-      width: 150,
+      width: isMobile ? 120 : 150,
       renderCell: (params) => (
-        <Chip label={params.value} color={getStatusColor(params.value)} />
+        <Chip
+          label={params.value}
+          size={isMobile ? "small" : "medium"}
+          color={getStatusColor(params.value)}
+        />
       ),
     },
     {
       field: "total",
       headerName: "Total",
-      width: 140,
+      width: isMobile ? 110 : 140,
       renderCell: (params) => formatBRL(params.row?.total ?? 0),
     },
     {
       field: "actions",
       headerName: "",
-      width: 150,
+      width: isMobile ? 120 : 150,
       sortable: false,
       renderCell: (params) => (
         <Button
           variant="contained"
-          size="small"
+          size={isMobile ? "small" : "small"}
           onClick={() => navigate(`/orders/${params.row.order_id}`)}
+          fullWidth={isMobile}
         >
           Detalhes
         </Button>
@@ -86,30 +113,57 @@ export default function OrdersDashboard() {
   ];
 
   return (
-    <Box>
-      <Stack spacing={2} mb={2} ml={1} mt={1}>
-        <Typography variant="h5" fontWeight={800}>
+    <Box
+      sx={{
+        px: { xs: 1, sm: 2 },
+        pt: { xs: 1, sm: 2 },
+      }}
+    >
+      <Stack spacing={1.5} mb={2}>
+        <Typography variant={isMobile ? "h6" : "h5"} fontWeight={800}>
           Pedidos
         </Typography>
 
         <TextField
           label="Buscar pedido"
           size="small"
+          fullWidth
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </Stack>
 
-      <Box sx={{ height: 600 }}>
+      <Box
+        sx={{
+          width: "100%",
+          // altura adaptada pra caber em telas pequenas
+          height: { xs: "calc(100vh - 210px)", sm: 600 },
+          minHeight: { xs: 420, sm: 600 },
+          "& .MuiDataGrid-cell": {
+            py: { xs: 0.5, sm: 1 },
+          },
+        }}
+      >
         <DataGrid
           rows={filteredRows}
           columns={columns}
           loading={loading}
-          pageSizeOptions={[5, 10, 20]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10, page: 0 } },
-          }}
           disableRowSelectionOnClick
+          // paginação mais amigável no mobile
+          pageSizeOptions={isMobile ? [5, 10] : [5, 10, 20]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: isMobile ? 5 : 10, page: 0 } },
+          }}
+          sx={{
+            borderRadius: 2,
+            // melhora leitura em telas pequenas
+            "& .MuiDataGrid-columnHeaders": {
+              fontSize: { xs: 12, sm: 13 },
+            },
+            "& .MuiDataGrid-cell": {
+              fontSize: { xs: 12.5, sm: 13 },
+            },
+          }}
         />
       </Box>
     </Box>

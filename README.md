@@ -1,20 +1,51 @@
-# Desafio Técnico - Delivery App (Coco Bambu)
+# 📦 Desafio Técnico -- Delivery App (Coco Bambu)
 
-API em Django para leitura e manipulação de pedidos a partir de um
-arquivo JSON (`pedidos.json`), com suporte a transição de status via
-máquina de estados e persistência no próprio arquivo.
+![CI](https://github.com/kirz4/delivery-api-cocobambu/actions/workflows/ci.yml/badge.svg)
+[![codecov](https://codecov.io/gh/kirz4/delivery-api-cocobambu/branch/main/graph/badge.svg)](https://codecov.io/gh/kirz4/delivery-api-cocobambu)
+
+Sistema fullstack para leitura e manipulação de pedidos com:
+
+-   🧠 Máquina de Estados para controle de status
+-   💾 Persistência em arquivo JSON
+-   🐳 Dockerizado
+-   🧪 Testes automatizados (Backend + Frontend)
+-   📊 Coverage integrado com Codecov
 
 ------------------------------------------------------------------------
 
-## 🚀 Stack Utilizada
+# 🚀 Stack Utilizada
+
+## Backend
 
 -   Python 3.12
 -   Django
--   Docker + Docker Compose
+-   Django REST Framework
+-   Pytest
+
+## Frontend
+
+-   React
+-   Vite
+-   MUI (Material UI)
+-   Vitest
+
+## DevOps
+
+-   Docker
+-   Docker Compose
+-   GitHub Actions (CI)
+-   Codecov
 
 ------------------------------------------------------------------------
 
-## ▶️ Como Rodar o Projeto
+# ▶️ Como Rodar o Projeto
+
+## ✅ Pré-requisitos
+
+-   Docker
+-   Docker Compose
+
+## 🔥 Subindo a aplicação
 
 Na raiz do projeto:
 
@@ -22,55 +53,45 @@ Na raiz do projeto:
 docker compose up --build
 ```
 
-A API ficará disponível em:
+## 🌐 Acessos
 
-    http://localhost:8000
+Frontend (Dashboard): http://localhost:5173
 
-------------------------------------------------------------------------
+Backend (API): http://localhost:8000
 
-## 📂 Persistência de Dados
-
-O backend lê e salva os pedidos em:
-
-    backend/data/pedidos.json
-
-A aplicação utiliza a variável de ambiente:
-
-    ORDERS_JSON_PATH=/app/data/pedidos.json
+Base da API: http://localhost:8000/api
 
 ------------------------------------------------------------------------
 
-## 🔌 Endpoints
+# 📂 Persistência de Dados
 
-Base URL:
+Os pedidos são armazenados em:
 
-    http://localhost:8000/api
+backend/data/pedidos.json
+
+Variável utilizada:
+
+ORDERS_JSON_PATH=/data/pedidos.json
 
 ------------------------------------------------------------------------
 
-### 📋 Listar pedidos
+# 🔌 Endpoints
 
-GET `/orders/`
+Base URL: http://localhost:8000/api
+
+## 📋 Listar pedidos
 
 ``` bash
 curl -i http://localhost:8000/api/orders/
 ```
 
-------------------------------------------------------------------------
-
-### 🔎 Buscar pedido por ID
-
-GET `/orders/<order_id>/`
+## 🔎 Buscar pedido por ID
 
 ``` bash
 curl -i http://localhost:8000/api/orders/<order_id>/
 ```
 
-------------------------------------------------------------------------
-
-### ➕ Criar pedido
-
-POST `/orders/`
+## ➕ Criar pedido
 
 ``` bash
 curl -i -X POST http://localhost:8000/api/orders/   -H "Content-Type: application/json"   -d '{
@@ -91,90 +112,59 @@ curl -i -X POST http://localhost:8000/api/orders/   -H "Content-Type: applicatio
   }'
 ```
 
-Respostas possíveis:
-
--   201 → Pedido criado
--   409 → Pedido já existe
-
-------------------------------------------------------------------------
-
-### ❌ Remover pedido
-
-DELETE `/orders/<order_id>/`
+## ❌ Remover pedido
 
 ``` bash
 curl -i -X DELETE http://localhost:8000/api/orders/<order_id>/
 ```
 
-Respostas possíveis:
-
--   200 → `{ "deleted": true }`
--   404 → Pedido não encontrado
-
-------------------------------------------------------------------------
-
-### 🔄 Alterar status (Máquina de Estados)
-
-PATCH `/orders/<order_id>/status/`
-
-Body:
-
-``` json
-{
-  "status": "DISPATCHED",
-  "origin": "STORE"
-}
-```
-
-Exemplo:
+## 🔄 Alterar status
 
 ``` bash
 curl -i -X PATCH http://localhost:8000/api/orders/<order_id>/status/   -H "Content-Type: application/json"   -d '{"status":"DISPATCHED","origin":"STORE"}'
 ```
 
-Respostas possíveis:
+------------------------------------------------------------------------
 
--   200 → Pedido atualizado
--   404 → Pedido não encontrado
--   409 → Transição inválida
--   400 → JSON inválido ou campo `status` ausente
+# 🔁 Máquina de Estados
+
+RECEIVED → CONFIRMED \| CANCELED\
+CONFIRMED → DISPATCHED \| CANCELED\
+DISPATCHED → DELIVERED \| CANCELED\
+DELIVERED → Final\
+CANCELED → Final
 
 ------------------------------------------------------------------------
 
-## 🔁 Máquina de Estados
+# 🧪 Testes
 
-Transições permitidas:
-
--   RECEIVED → CONFIRMED \| CANCELED
--   CONFIRMED → DISPATCHED \| CANCELED
--   DISPATCHED → DELIVERED \| CANCELED
--   DELIVERED → (final)
--   CANCELED → (final)
-
-------------------------------------------------------------------------
-
-## 🧪 Reset do JSON (Opcional)
-
-Para restaurar o arquivo original de pedidos:
+## Backend
 
 ``` bash
-cp backend/data/pedidos.seed.json backend/data/pedidos.json
-docker compose restart
+cd backend
+python -m pytest -q
+```
+
+## Frontend
+
+``` bash
+cd frontend
+npm test
 ```
 
 ------------------------------------------------------------------------
 
-## 📌 Observações Técnicas
+# 📦 Estrutura do Projeto
 
--   Persistência realizada com escrita controlada em arquivo JSON.
--   PATCH isento de CSRF pois a API é consumida via cliente externo
-    (curl/Insomnia).
--   Estrutura organizada em camadas:
-    -   Repository
-    -   Service
-    -   Domain (State Machine)
-    -   Views
+backend/ ├── apps/ │ ├── domain/ │ ├── services/ │ ├── repositories/ │
+└── views/ ├── data/ └── tests/
+
+frontend/ ├── src/pages/ ├── components/ └── tests/
+
+.github/workflows/ └── ci.yml
 
 ------------------------------------------------------------------------
 
+# 👨‍💻 Autor
 
+Lucas Cruz
