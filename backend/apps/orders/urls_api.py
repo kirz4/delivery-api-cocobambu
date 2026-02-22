@@ -5,4 +5,5 @@ urlpatterns = [
     path("orders/", views.orders_collection),
     path("orders/<str:order_id>/", views.order_resource),
     path("orders/<str:order_id>/status/", views.change_order_status),
+    path("orders/<str:order_id>/allowed-statuses/", views.order_allowed_statuses),
 ]

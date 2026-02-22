@@ -84,3 +84,21 @@ def change_order_status(request, order_id: str):
         return JsonResponse({"error": "Invalid storage format"}, status=500)
 
     return JsonResponse(updated, safe=False, status=200)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def order_allowed_statuses(request, order_id: str):
+    """
+    Retorna status atual + transições possíveis para o frontend renderizar botões válidos.
+    """
+    service = OrderService()
+    data, err = service.get_allowed_next_statuses(order_id)
+
+    if err == "not_found":
+        return JsonResponse({"error": "Order not found"}, status=404)
+
+    if err == "invalid_storage":
+        return JsonResponse({"error": "Invalid storage format"}, status=500)
+
+    return JsonResponse(data, safe=False, status=200)
