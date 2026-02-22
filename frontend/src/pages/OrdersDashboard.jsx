@@ -31,7 +31,8 @@ export default function OrdersDashboard() {
   React.useEffect(() => {
     async function fetchOrders() {
       try {
-        const res = await fetch("/api/orders/");
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+        const res = await fetch(`${API_BASE}/api/orders/`);
         const data = await res.json();
 
         const mapped = (Array.isArray(data) ? data : []).map((o) => ({
@@ -74,7 +75,7 @@ export default function OrdersDashboard() {
       headerName: "Loja",
       flex: 1,
       minWidth: 180,
-      hide: isMobile, // no celular, esconde pra caber melhor
+      hide: isMobile, 
     },
     {
       field: "status",
@@ -136,7 +137,6 @@ export default function OrdersDashboard() {
       <Box
         sx={{
           width: "100%",
-          // altura adaptada pra caber em telas pequenas
           height: { xs: "calc(100vh - 210px)", sm: 600 },
           minHeight: { xs: 420, sm: 600 },
           "& .MuiDataGrid-cell": {
@@ -149,14 +149,12 @@ export default function OrdersDashboard() {
           columns={columns}
           loading={loading}
           disableRowSelectionOnClick
-          // paginação mais amigável no mobile
           pageSizeOptions={isMobile ? [5, 10] : [5, 10, 20]}
           initialState={{
             pagination: { paginationModel: { pageSize: isMobile ? 5 : 10, page: 0 } },
           }}
           sx={{
             borderRadius: 2,
-            // melhora leitura em telas pequenas
             "& .MuiDataGrid-columnHeaders": {
               fontSize: { xs: 12, sm: 13 },
             },

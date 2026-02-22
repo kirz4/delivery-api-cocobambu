@@ -42,7 +42,6 @@ jobs:
           echo "[]" > /tmp/pedidos.json
           python -m pytest -q --cov=apps --cov-report=xml:coverage.xml --cov-report=term
 
-      # opcional (baixar o arquivo no Actions)
       - name: Upload backend coverage artifact
         uses: actions/upload-artifact@v4
         with:
@@ -82,7 +81,6 @@ jobs:
       - name: Run tests (with coverage)
         run: npm run test -- --coverage
 
-      # opcional (baixar o relatório no Actions)
       - name: Upload frontend coverage artifact
         uses: actions/upload-artifact@v4
         with:

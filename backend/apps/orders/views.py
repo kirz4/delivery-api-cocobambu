@@ -16,7 +16,6 @@ def orders_collection(request):
     if request.method == "GET":
         return JsonResponse(repo.list(), safe=False)
 
-    # POST
     try:
         payload = json.loads(request.body or "{}")
     except json.JSONDecodeError:
@@ -50,7 +49,6 @@ def order_resource(request, order_id: str):
             return JsonResponse({"error": "Order not found"}, status=404)
         return JsonResponse(order, safe=False)
 
-    # DELETE
     ok = repo.delete(order_id)
     if not ok:
         return JsonResponse({"error": "Order not found"}, status=404)
