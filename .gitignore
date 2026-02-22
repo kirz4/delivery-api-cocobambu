@@ -1,5 +1,43 @@
+# =========================
+# Python / Backend
+# =========================
 .venv/
 backend/.venv/
+venv/
+
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
 db.sqlite3
+
+# Runtime storage (JSON file-based DB)
+backend/data/*.json
+
+# =========================
+# Environment variables
+# =========================
+.env
+.env.*
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+
+# =========================
+# Editor / IDE
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
