@@ -1,24 +1,18 @@
-"""
-Django settings for delivery_api project.
-"""
-
 import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Segurança / env
 SECRET_KEY = os.getenv(
     "SECRET_KEY",
     "django-insecure-_^e1*o=6!nenj+15+p$$h*3x-$3ai(cpa&dr&@kvdruhs6emcu",
 )
 
-DEBUG = os.getenv("DEBUG", "0") in ("1", "true", "True", "yes", "YES")
+DEBUG = os.getenv("DEBUG", "0").lower() in ("1", "true", "yes")
 
 raw_hosts = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,backend")
 ALLOWED_HOSTS = [h.strip() for h in raw_hosts.split(",") if h.strip()]
 
-# em dev, pode aceitar também 0.0.0.0
 if DEBUG and "0.0.0.0" not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append("0.0.0.0")
 
@@ -29,11 +23,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
     "rest_framework",
     "apps.orders.apps.OrdersConfig",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -41,6 +37,10 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://delivery-api-cocobambu.vercel.app",
 ]
 
 ROOT_URLCONF = "delivery_api.urls"
@@ -83,7 +83,6 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-# JSON “database”
 ORDERS_JSON_PATH = os.getenv("ORDERS_JSON_PATH", str(BASE_DIR / "data" / "pedidos.json"))
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
