@@ -42,10 +42,9 @@ logs/
 *.swp
 *.swo
 
-# Coverage (local)
-backend/coverage.xml
-backend/.coverage
-backend/htmlcov/
-.coverage
+# Coverage
+.coverage*
 coverage.xml
 htmlcov/
+backend/coverage.xml
+backend/htmlcov/
