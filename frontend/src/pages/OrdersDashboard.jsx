@@ -15,7 +15,6 @@ const formatBRL = (value) =>
     currency: "BRL",
   }).format(Number(value ?? 0));
 export default function OrdersDashboard() {
-  console.log("OrdersDashboard render ✅");
   const navigate = useNavigate();
   const [rows, setRows] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -36,8 +35,6 @@ export default function OrdersDashboard() {
         }));
 
         setRows(mapped);
-        console.log("RAW first", data?.[0]);
-        console.log("MAPPED first", mapped?.[0]);
       } catch (err) {
         console.error(err);
       } finally {
@@ -109,6 +106,9 @@ export default function OrdersDashboard() {
           columns={columns}
           loading={loading}
           pageSizeOptions={[5, 10, 20]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 10, page: 0 } },
+          }}
           disableRowSelectionOnClick
         />
       </Box>
