@@ -31,8 +31,14 @@ export default function OrdersDashboard() {
   React.useEffect(() => {
     async function fetchOrders() {
       try {
-        const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
-        const res = await fetch(`${API_BASE}/api/orders/`);
+        const API_BASE_RAW = import.meta.env.VITE_API_BASE_URL;
+        const API_BASE =
+          API_BASE_RAW && API_BASE_RAW !== "VITE_API_BASE_URL"
+            ? API_BASE_RAW.replace(/\/$/, "")
+            : "";
+
+        const url = API_BASE ? `${API_BASE}/api/orders/` : "/api/orders/";
+        const res = await fetch(url);
         const data = await res.json();
 
         const mapped = (Array.isArray(data) ? data : []).map((o) => ({
