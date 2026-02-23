@@ -97,19 +97,3 @@ ORDERS_JSON_PATH = os.getenv("ORDERS_JSON_PATH", str(BASE_DIR / "data" / "pedido
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-from pathlib import Path
-
-print(">>> BASE_DIR =", BASE_DIR)
-print(">>> ORDERS_JSON_PATH =", ORDERS_JSON_PATH)
-
-p = Path(ORDERS_JSON_PATH)
-print(">>> ORDERS_JSON_PATH exists? =", p.exists())
-if p.exists():
-    print(">>> ORDERS_JSON_PATH size =", p.stat().st_size)
-import os
-from pathlib import Path
-
-print(">>> LIST /app:", os.listdir("/app"))
-print(">>> LIST /app/data exists?", Path("/app/data").exists())
-if Path("/app/data").exists():
-    print(">>> LIST /app/data:", os.listdir("/app/data"))

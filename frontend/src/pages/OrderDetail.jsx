@@ -15,7 +15,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { apiUrl } from "../lib/api"; // ajuste o caminho se necessário
+import { apiUrl } from "../lib/api"; 
 
 const formatBRL = (value) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
@@ -44,7 +44,6 @@ function statusColor(status) {
   }
 }
 
-// evita crash quando a resposta é HTML/404
 async function safeJson(res) {
   const text = await res.text();
   try {
@@ -94,7 +93,6 @@ export default function OrderDetail() {
       const orderPayload = await safeJson(orderRes);
 
       if (!orderRes.ok) {
-        // backend pode mandar {"detail": "..."} ou {"error": "..."}
         const msg =
           orderPayload?.detail ||
           orderPayload?.error ||
@@ -388,52 +386,6 @@ export default function OrderDetail() {
                     </Box>
                   </Box>
                 ))}
-              </Stack>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* TIMELINE */}
-        <Card>
-          <CardContent>
-            <Typography fontWeight={800} mb={1}>
-              Timeline
-            </Typography>
-
-            {statuses.length === 0 ? (
-              <Typography sx={{ opacity: 0.8 }}>Sem histórico de status.</Typography>
-            ) : (
-              <Stack spacing={1}>
-                {statuses
-                  .slice()
-                  .sort(
-                    (a, b) => Number(a.created_at ?? 0) - Number(b.created_at ?? 0)
-                  )
-                  .map((s, idx) => (
-                    <Box
-                      key={idx}
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        gap: 2,
-                      }}
-                    >
-                      <Box>
-                        <Chip
-                          size="small"
-                          label={s.name ?? "-"}
-                          color={statusColor(s.name)}
-                          sx={{ mr: 1 }}
-                        />
-                        <Typography component="span" sx={{ opacity: 0.9 }}>
-                          origin: {s.origin ?? "-"}
-                        </Typography>
-                      </Box>
-                      <Typography sx={{ opacity: 0.8 }}>
-                        {formatDateTime(s.created_at)}
-                      </Typography>
-                    </Box>
-                  ))}
               </Stack>
             )}
           </CardContent>

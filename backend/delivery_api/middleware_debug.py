@@ -8,5 +8,4 @@ class DebugCorsMiddleware:
 
         response = self.get_response(request)
 
-        print(">>> RESPONSE ACAO =", response.headers.get("Access-Control-Allow-Origin"))
         return response
