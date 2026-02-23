@@ -15,6 +15,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { apiUrl } from "../lib/api"; // ajuste o caminho se necessário
 
 const formatBRL = (value) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
@@ -43,6 +44,16 @@ function statusColor(status) {
   }
 }
 
+// evita crash quando a resposta é HTML/404
+async function safeJson(res) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { _raw: text };
+  }
+}
+
 export default function OrderDetail() {
   const { orderId } = useParams();
 
@@ -58,25 +69,50 @@ export default function OrderDetail() {
   const [success, setSuccess] = React.useState("");
 
   const fetchOrder = React.useCallback(async () => {
+    if (!orderId) {
+      setOrder(null);
+      setAllowedNext([]);
+      setNextStatus("");
+      setError("Order ID inválido.");
+      setLoading(false);
+      return;
+    }
+
     setError("");
     setSuccess("");
     setLoading(true);
 
     try {
+      const orderUrl = apiUrl(`/api/orders/${orderId}/`);
+      const allowedUrl = apiUrl(`/api/orders/${orderId}/allowed-statuses/`);
+
       const [orderRes, allowedRes] = await Promise.all([
-        fetch(`/api/orders/${orderId}/`),
-        fetch(`/api/orders/${orderId}/allowed-statuses/`),
+        fetch(orderUrl),
+        fetch(allowedUrl),
       ]);
 
-      const orderData = await orderRes.json();
-      setOrder(orderData);
+      const orderPayload = await safeJson(orderRes);
+
+      if (!orderRes.ok) {
+        // backend pode mandar {"detail": "..."} ou {"error": "..."}
+        const msg =
+          orderPayload?.detail ||
+          orderPayload?.error ||
+          "Pedido não encontrado.";
+        setOrder(null);
+        setAllowedNext([]);
+        setNextStatus("");
+        setError(msg);
+        return;
+      }
+
+      setOrder(orderPayload);
 
       if (allowedRes.ok) {
-        const allowedData = await allowedRes.json();
-        const allowed = Array.isArray(allowedData.allowed)
-          ? allowedData.allowed
+        const allowedPayload = await safeJson(allowedRes);
+        const allowed = Array.isArray(allowedPayload?.allowed)
+          ? allowedPayload.allowed
           : [];
-
         setAllowedNext(allowed);
         setNextStatus(allowed[0] ?? "");
       } else {
@@ -85,6 +121,9 @@ export default function OrderDetail() {
       }
     } catch (e) {
       console.error(e);
+      setOrder(null);
+      setAllowedNext([]);
+      setNextStatus("");
       setError("Falha ao carregar o pedido.");
     } finally {
       setLoading(false);
@@ -96,29 +135,30 @@ export default function OrderDetail() {
   }, [fetchOrder]);
 
   async function handleChangeStatus() {
-    if (!nextStatus) return;
+    if (!nextStatus || !orderId) return;
 
     setSaving(true);
     setError("");
     setSuccess("");
 
     try {
-      const res = await fetch(`/api/orders/${orderId}/status/`, {
+      const url = apiUrl(`/api/orders/${orderId}/status/`);
+      const res = await fetch(url, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: nextStatus, origin }),
       });
 
-      const payload = await res.json();
+      const payload = await safeJson(res);
 
       if (!res.ok) {
-        setError(payload?.error ?? "Erro ao atualizar status.");
+        const msg =
+          payload?.detail || payload?.error || "Erro ao atualizar status.";
+        setError(msg);
         return;
       }
 
       setSuccess(`Status atualizado para ${payload?.order?.last_status_name}.`);
-
-      // Recarrega pedido + allowed statuses do backend (fonte da verdade)
       await fetchOrder();
     } catch (e) {
       console.error(e);
@@ -129,7 +169,16 @@ export default function OrderDetail() {
   }
 
   if (loading) return <Typography sx={{ p: 2 }}>Carregando...</Typography>;
-  if (!order) return <Typography sx={{ p: 2 }}>Pedido não encontrado.</Typography>;
+  if (!order)
+    return (
+      <Box sx={{ p: 2 }}>
+        {error ? (
+          <Alert severity="error">{error}</Alert>
+        ) : (
+          <Typography>Pedido não encontrado.</Typography>
+        )}
+      </Box>
+    );
 
   const o = order.order ?? {};
   const store = o.store ?? {};
@@ -257,7 +306,11 @@ export default function OrderDetail() {
                   {payments.map((p, idx) => (
                     <Box
                       key={idx}
-                      sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: 2,
+                      }}
                     >
                       <Typography>
                         {p.origin ?? "-"}{" "}
@@ -309,7 +362,11 @@ export default function OrderDetail() {
                 {items.map((it, idx) => (
                   <Box
                     key={idx}
-                    sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 2,
+                    }}
                   >
                     <Box>
                       <Typography fontWeight={700}>
@@ -355,7 +412,11 @@ export default function OrderDetail() {
                   .map((s, idx) => (
                     <Box
                       key={idx}
-                      sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: 2,
+                      }}
                     >
                       <Box>
                         <Chip
