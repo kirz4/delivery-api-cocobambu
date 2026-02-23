@@ -50,6 +50,9 @@ CORS_ALLOWED_ORIGINS = [
     "https://delivery-api-cocobambu.vercel.app",
 ]
 
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://delivery-api-cocobambu-.*\.vercel\.app$",
+]
 ROOT_URLCONF = "delivery_api.urls"
 
 TEMPLATES = [
