@@ -8,6 +8,11 @@ class JsonStorage:
         self.path = Path(settings.ORDERS_JSON_PATH)
 
     def read(self):
+        print(">>> ORDERS_JSON_PATH =", settings.ORDERS_JSON_PATH)
+        print(">>> RESOLVED =", self.path.resolve())
+        print(">>> EXISTS? =", self.path.exists())
+        if self.path.exists():
+            print(">>> SIZE =", self.path.stat().st_size)
         if not self.path.exists() or self.path.stat().st_size == 0:
             return []
         try:
