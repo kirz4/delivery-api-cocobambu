@@ -45,12 +45,26 @@ function statusColor(status) {
 }
 
 async function safeJson(res) {
-  const text = await res.text();
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { _raw: text };
+  // 1) Se o mock tem json(), usa
+  if (res && typeof res.json === "function") {
+    try {
+      return await res.json();
+    } catch {
+    }
   }
+
+
+  if (res && typeof res.text === "function") {
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { _raw: text };
+    }
+  }
+
+  
+  return { _raw: null };
 }
 
 export default function OrderDetail() {
