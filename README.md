@@ -1,5 +1,5 @@
 
-# 📦 Desafio Técnico — Delivery App (Coco Bambu)
+# 📦 Delivery App
 
 ![CI](https://github.com/kirz4/delivery-api-cocobambu/actions/workflows/ci.yml/badge.svg)
 [![codecov](https://codecov.io/gh/kirz4/delivery-api-cocobambu/branch/main/graph/badge.svg)](https://codecov.io/gh/kirz4/delivery-api-cocobambu)
